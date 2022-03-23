@@ -24,6 +24,10 @@ public class FishingManager : MonoBehaviour
     public GameState gameState;
     private GameObject thrownFloat;
 
+    private Vector2 clickPoint;
+    private Vector2 unClickPoint;
+    private Sequence sequence;
+
     private void Awake()
     {
         instance = this;
@@ -53,9 +57,22 @@ public class FishingManager : MonoBehaviour
         }
     }
 
+    private void Fail()
+    {
+        gameState = GameState.Preparation;
+    }
+
     private void Update()
     {
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (gameState == GameState.Hooking)
+                Hook();
+        }
+        if (Input.GetMouseButtonUp(0))
+        {
 
+        }
     }
 
     public void Casting()
@@ -73,7 +90,7 @@ public class FishingManager : MonoBehaviour
     private void ZoomIn()
     {
         Camera.main.transform.DOLocalMove(new Vector3(floatPosition.transform.position.x, floatPosition.transform.position.y,
-            Camera.main.transform.position.z), 1f);
+            Camera.main.transform.position.z), 1f).OnComplete(GetBite);
         Camera.main.DOOrthoSize(3, 1f).OnComplete(()=> Debug.Log("끝"));
     }
 
@@ -84,8 +101,67 @@ public class FishingManager : MonoBehaviour
         Camera.main.DOOrthoSize(10, 1f).OnComplete(() => Debug.Log("끝"));
     }
 
+    //최대 내려가는거 2
     private void GetBite()
     {
+        sequence = DOTween.Sequence();
+        sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y - 1, 0.5f));
+        sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y + 2, 0.5f));
+        sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y - 2, 0.5f));
+        sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y + 3, 0.5f));
 
+        sequence.Play();
+        sequence.OnComplete(HookingMiss);
+    }
+
+    public void Hook()
+    {
+        sequence.Pause();
+        float hookPoint = floatPosition.position.y - thrownFloat.transform.position.y;
+        Debug.Log(hookPoint);
+        Debug.Log(floatPosition.position.y + " " + thrownFloat.transform.position.y);
+        if (hookPoint > 1.5f)
+        {
+            Debug.Log("perfect");
+            HookingSuccess(0);
+        }
+        else if(hookPoint > 1f)
+        {
+            Debug.Log("great");
+            HookingSuccess(1);
+        }
+        else if(hookPoint > 0.5f)   
+        {
+            Debug.Log("good");
+            HookingSuccess(2);
+        }
+        else
+        {
+            Debug.Log("miss");
+            HookingMiss();
+        }
+    }
+
+    private void HookingMiss()
+    {
+        gameState = GameState.Preparation;
+        ZoomOut();
+        Destroy(fishingFloat);
+    }
+
+    private void HookingSuccess(int level)
+    {
+        NextState();
+        switch (level)
+        {
+            case 0: //perfect
+                break;
+            case 1: //great
+                break;
+            case 2: //good
+                break;  
+        }
+        ZoomOut();
+        Destroy(thrownFloat);
     }
 }
