@@ -106,9 +106,10 @@ public class FishingManager : MonoBehaviour
     {
         sequence = DOTween.Sequence();
         sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y - 1, 0.5f));
-        sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y + 2, 0.5f));
+        sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y, 0.5f));
+        sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y - 1, 0.5f));
+        sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y, 0.5f));
         sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y - 2, 0.5f));
-        sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y + 3, 0.5f));
 
         sequence.Play();
         sequence.OnComplete(HookingMiss);
@@ -146,7 +147,8 @@ public class FishingManager : MonoBehaviour
     {
         gameState = GameState.Preparation;
         ZoomOut();
-        Destroy(fishingFloat);
+        sequence.Kill(); 
+        DestroyImmediate(thrownFloat, true);
     }
 
     private void HookingSuccess(int level)
