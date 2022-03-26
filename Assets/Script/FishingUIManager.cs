@@ -12,6 +12,7 @@ public class FishingUIManager : MonoBehaviour
 
     private void Update()
     {
+        Debug.Log(FishingManager.Instance.gameState);
         switch (FishingManager.Instance.gameState)
         {
             case GameState.Preparation:

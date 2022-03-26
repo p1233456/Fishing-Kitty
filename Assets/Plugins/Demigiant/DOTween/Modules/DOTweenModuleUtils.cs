@@ -1,4 +1,4 @@
-﻿// Author: Daniele Giardini - http://www.demigiant.com
+// Author: Daniele Giardini - http://www.demigiant.com
 // Created: 2018/07/13
 
 using System;
@@ -147,9 +147,9 @@ namespace DG.Tweening
                     Rigidbody2D rBody2D = target.GetComponent<Rigidbody2D>();
                     if (rBody2D != null) {
                         rBodyFoundAndTweened = true;
-                        t = isLocal
-                            ? rBody2D.DOLocalPath(path, duration, pathMode)
-                            : rBody2D.DOPath(path, duration, pathMode);
+                        //t = isLocal
+                        //    ? rBody2D.DOLocalPath(path, duration, pathMode)
+                        //    : rBody2D.DOPath(path, duration, pathMode);
                     }
                 }
 #endif

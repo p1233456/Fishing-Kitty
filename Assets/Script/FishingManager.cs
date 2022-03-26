@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using System.Data;
 
 public enum GameState
 {
@@ -19,6 +20,7 @@ public class FishingManager : MonoBehaviour
     {
         get { return instance; }
     }
+
     [SerializeField] private GameObject fishingFloat;
     [SerializeField] private Transform floatPosition;
     public GameState gameState;
@@ -28,6 +30,13 @@ public class FishingManager : MonoBehaviour
     private Vector2 unClickPoint;
     private Sequence sequence;
 
+    float fishingTime;  //경과 시간
+    bool isFighting;   //파이팅 중 여부
+
+    Fish biteFish;
+
+    Dictionary<string, KeyValuePair<float, float>> stageProbability;
+
     private void Awake()
     {
         instance = this;
@@ -36,6 +45,7 @@ public class FishingManager : MonoBehaviour
     private void Start()
     {
         gameState = GameState.Preparation;
+        SetStageProbability("UpStream");
     }
 
     private void NextState()
@@ -64,6 +74,10 @@ public class FishingManager : MonoBehaviour
 
     private void Update()
     {
+        if (isFighting)
+        {
+            fishingTime += Time.deltaTime;
+        }
         if (Input.GetMouseButtonDown(0))
         {
             if (gameState == GameState.Hooking)
@@ -91,14 +105,14 @@ public class FishingManager : MonoBehaviour
     {
         Camera.main.transform.DOLocalMove(new Vector3(floatPosition.transform.position.x, floatPosition.transform.position.y,
             Camera.main.transform.position.z), 1f).OnComplete(GetBite);
-        Camera.main.DOOrthoSize(3, 1f).OnComplete(()=> Debug.Log("끝"));
+        Camera.main.DOOrthoSize(3, 1f);
     }
 
     private void ZoomOut()
     {
         Camera.main.transform.DOLocalMove(new Vector3(0, 0,
               Camera.main.transform.position.z), 1f);
-        Camera.main.DOOrthoSize(10, 1f).OnComplete(() => Debug.Log("끝"));
+        Camera.main.DOOrthoSize(10, 1f);
     }
 
     //최대 내려가는거 2
@@ -110,9 +124,44 @@ public class FishingManager : MonoBehaviour
         sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y - 1, 0.5f));
         sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y, 0.5f));
         sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y - 2, 0.5f));
-
-        sequence.Play();
         sequence.OnComplete(HookingMiss);
+        sequence.Play();
+
+        GetRandomFish();
+    }
+
+    private void GetRandomFish()
+    {
+        float random = Random.Range(0f, 1f);
+
+        string fishName = null;
+
+        foreach(var probability in stageProbability)
+        {
+            if (random > probability.Value.Key && random < probability.Value.Value)
+                fishName = probability.Key;                 
+        }
+        biteFish = new Fish(fishName);
+        Debug.Log(biteFish.FishName);
+    }
+
+    private void SetStageProbability(string stageName)
+    {
+        stageProbability = new Dictionary<string, KeyValuePair<float, float>>();
+        float amount = 0;
+        switch (stageName)
+        {
+            case "UpStream":
+                foreach (var row in FishingData.UpStream.AsEnumerable())
+                {
+                    stageProbability.Add(row.Field<string>("Name"), new KeyValuePair<float, float>(amount, amount + row.Field<float>("Probability")));
+                    amount += row.Field<float>("Probability");
+                }
+                break;
+            default:
+                Debug.Log("잘못된 스테이지명 입력");
+                break;
+        }
     }
 
     public void Hook()
@@ -165,5 +214,8 @@ public class FishingManager : MonoBehaviour
         }
         ZoomOut();
         Destroy(thrownFloat);
+        Debug.Log(biteFish.Size);
+        fishingTime = 0f;
+        isFighting = true;
     }
 }
