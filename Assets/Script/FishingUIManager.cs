@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FishingUIManager : MonoBehaviour
 {
@@ -10,9 +11,11 @@ public class FishingUIManager : MonoBehaviour
     public GameObject[] fightingUI;
     public GameObject[] resultUI;
 
+    [SerializeField] private Image tensionImage;
+
     private void Update()
     {
-        Debug.Log(FishingManager.Instance.gameState);
+        //Debug.Log(FishingManager.Instance.gameState);
         switch (FishingManager.Instance.gameState)
         {
             case GameState.Preparation:
@@ -35,6 +38,7 @@ public class FishingUIManager : MonoBehaviour
                 Hide(hookingUI);
                 Hide(preparationUI);
                 Hide(resultUI);
+                ViewTensionGage();
                 break;
             case GameState.Result:
                 Appear(resultUI);
@@ -70,5 +74,10 @@ public class FishingUIManager : MonoBehaviour
         {
             target.SetActive(true);
         }
+    }
+
+    private void ViewTensionGage()
+    {
+        tensionImage.fillAmount = FishingManager.Instance.TensionRate;
     }
 }

@@ -37,6 +37,16 @@ public class FishingManager : MonoBehaviour
 
     Dictionary<string, KeyValuePair<float, float>> stageProbability;
 
+    float tensionRate = 0f;
+    public float TensionRate { get { return tensionRate; } }
+    float maxTensionRate = 1f;
+
+    [SerializeField] Transform handle;
+
+    [SerializeField] Transform rotatePoint;
+
+    bool isRealling = false;
+
     private void Awake()
     {
         instance = this;
@@ -56,6 +66,7 @@ public class FishingManager : MonoBehaviour
                 gameState = GameState.Hooking;
                 break;
             case GameState.Hooking:
+                tensionRate = 0f;
                 gameState = GameState.Fighting;
                 break;
             case GameState.Fighting:
@@ -77,6 +88,18 @@ public class FishingManager : MonoBehaviour
         if (isFighting)
         {
             fishingTime += Time.deltaTime;
+            if (isRealling)
+            {
+                Realling();
+                if (Input.GetMouseButtonUp(0))
+                {
+                    RealingEnd();
+                }
+            }
+            else
+            {
+                NotRealing();
+            }
         }
         if (Input.GetMouseButtonDown(0))
         {
@@ -136,10 +159,10 @@ public class FishingManager : MonoBehaviour
 
         string fishName = null;
 
-        foreach(var probability in stageProbability)
+        foreach (var probability in stageProbability)
         {
             if (random > probability.Value.Key && random < probability.Value.Value)
-                fishName = probability.Key;                 
+                fishName = probability.Key;
         }
         biteFish = new Fish(fishName);
         Debug.Log(biteFish.FishName);
@@ -175,12 +198,12 @@ public class FishingManager : MonoBehaviour
             Debug.Log("perfect");
             HookingSuccess(0);
         }
-        else if(hookPoint > 1f)
+        else if (hookPoint > 1f)
         {
             Debug.Log("great");
             HookingSuccess(1);
         }
-        else if(hookPoint > 0.5f)   
+        else if (hookPoint > 0.5f)
         {
             Debug.Log("good");
             HookingSuccess(2);
@@ -196,7 +219,7 @@ public class FishingManager : MonoBehaviour
     {
         gameState = GameState.Preparation;
         ZoomOut();
-        sequence.Kill(); 
+        sequence.Kill();
         DestroyImmediate(thrownFloat, true);
     }
 
@@ -210,12 +233,43 @@ public class FishingManager : MonoBehaviour
             case 1: //great
                 break;
             case 2: //good
-                break;  
+                break;
         }
         ZoomOut();
         Destroy(thrownFloat);
         Debug.Log(biteFish.Size);
         fishingTime = 0f;
         isFighting = true;
+    }
+
+    private void SetMaxTensionRate(float maxTension)
+    {
+        this.maxTensionRate = maxTension;
+    }
+
+    public void RealingStart()
+    {
+        isRealling = true;
+    }
+
+    public void RealingEnd()
+    {
+        isRealling = false;
+    }
+
+    public void Realling (){
+        tensionRate += 0.1f * Time.deltaTime;
+        MoveHandle();
+    }
+
+    public void NotRealing()
+    {
+        tensionRate -= 0.1f * Time.deltaTime;
+    }
+
+    private void MoveHandle()
+    {
+        Debug.Log("MoveHandle");
+        handle.RotateAround(rotatePoint.position, Vector3.back, 10f);
     }
 }
