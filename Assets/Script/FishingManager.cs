@@ -30,8 +30,8 @@ public class FishingManager : MonoBehaviour
     private Vector2 unClickPoint;
     private Sequence sequence;
 
-    float fishingTime;  //경과 시간
-    bool isFighting;   //파이팅 중 여부
+    int lastFishingTime = 0;
+    float fishingTime = 0f;  //경과 시간
 
     Fish biteFish;
 
@@ -46,6 +46,13 @@ public class FishingManager : MonoBehaviour
     [SerializeField] Transform rotatePoint;
 
     bool isRealling = false;
+
+    [SerializeField] int damage;
+
+    [SerializeField] GameObject fishShadow;
+    [SerializeField] GameObject rode;
+    float distance;
+    [SerializeField] Transform landinPoint;
 
     private void Awake()
     {
@@ -78,15 +85,11 @@ public class FishingManager : MonoBehaviour
         }
     }
 
-    private void Fail()
-    {
-        gameState = GameState.Preparation;
-    }
-
     private void Update()
     {
-        if (isFighting)
+        if (gameState == GameState.Fighting)
         {
+            distance = Vector2.Distance(landinPoint.position, biteFish.transform.position);
             fishingTime += Time.deltaTime;
             if (isRealling)
             {
@@ -100,7 +103,23 @@ public class FishingManager : MonoBehaviour
             {
                 NotRealing();
             }
+
+            if (tensionRate > maxTensionRate + 0.5f)
+                Fail();
+
+            if (lastFishingTime + 1 < fishingTime)
+            {
+                DamageFish();
+                lastFishingTime = Mathf.FloorToInt(fishingTime);
+                Debug.Log("경과 : " + lastFishingTime + "거리 : " + distance);
+            }
+            if(distance <= 0.1f)
+            {
+                GetFish();
+            }
+            MoveRode();
         }
+
         if (Input.GetMouseButtonDown(0))
         {
             if (gameState == GameState.Hooking)
@@ -109,6 +128,22 @@ public class FishingManager : MonoBehaviour
         if (Input.GetMouseButtonUp(0))
         {
 
+        }
+        if(gameState == GameState.Result)
+        {
+            NextState();
+        }
+    }
+
+    private void Fail()
+    {
+        fishingTime = 0f;
+        lastFishingTime = 0;
+        gameState = GameState.Preparation;
+        if(biteFish != null)
+        {
+            Destroy(biteFish.gameObject);
+            biteFish = null;
         }
     }
 
@@ -164,7 +199,8 @@ public class FishingManager : MonoBehaviour
             if (random > probability.Value.Key && random < probability.Value.Value)
                 fishName = probability.Key;
         }
-        biteFish = new Fish(fishName);
+        biteFish = Instantiate(fishShadow).GetComponent<Fish>();
+        biteFish.SetFish(fishName);
         Debug.Log(biteFish.FishName);
     }
 
@@ -221,6 +257,7 @@ public class FishingManager : MonoBehaviour
         ZoomOut();
         sequence.Kill();
         DestroyImmediate(thrownFloat, true);
+        Fail();
     }
 
     private void HookingSuccess(int level)
@@ -239,7 +276,7 @@ public class FishingManager : MonoBehaviour
         Destroy(thrownFloat);
         Debug.Log(biteFish.Size);
         fishingTime = 0f;
-        isFighting = true;
+        gameState = GameState.Fighting;
     }
 
     private void SetMaxTensionRate(float maxTension)
@@ -258,18 +295,42 @@ public class FishingManager : MonoBehaviour
     }
 
     public void Realling (){
-        tensionRate += 0.1f * Time.deltaTime;
+        tensionRate += 1f * Time.deltaTime;
         MoveHandle();
+        biteFish.Move(landinPoint.position);
     }
 
     public void NotRealing()
     {
-        tensionRate -= 0.1f * Time.deltaTime;
+        tensionRate -= 0.5f * Time.deltaTime;
     }
 
     private void MoveHandle()
     {
-        Debug.Log("MoveHandle");
+        //Debug.Log("MoveHandle");
         handle.RotateAround(rotatePoint.position, Vector3.back, 10f);
+    }
+
+    private void DamageFish()
+    {
+        biteFish.GetDamage(Mathf.FloorToInt(tensionRate * damage));
+    }
+
+    private void MoveFish()
+    {
+        
+    }
+
+    private void MoveRode()
+    {
+        float angle = Mathf.Atan2(biteFish.transform.position.y, biteFish.transform.position.x) * Mathf.Rad2Deg;
+        rode.transform.rotation = Quaternion.AngleAxis(angle, Vector3.back);
+    }
+
+    private void GetFish()
+    {
+        Destroy(biteFish.gameObject);
+        biteFish = null;
+        NextState();    //result로 State 전환
     }
 }
