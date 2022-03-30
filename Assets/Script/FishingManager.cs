@@ -323,8 +323,10 @@ public class FishingManager : MonoBehaviour
 
     private void MoveRode()
     {
-        float angle = Mathf.Atan2(biteFish.transform.position.y, biteFish.transform.position.x) * Mathf.Rad2Deg;
-        rode.transform.rotation = Quaternion.AngleAxis(angle, Vector3.back);
+        Vector2 dir = new Vector2(biteFish.transform.position.x - landinPoint.transform.position.x,
+            biteFish.transform.position.y - landinPoint.transform.position.y);
+        float angle = Mathf.Atan2(dir.y, dir.x);
+        rode.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
     }
 
     private void GetFish()
@@ -332,5 +334,28 @@ public class FishingManager : MonoBehaviour
         Destroy(biteFish.gameObject);
         biteFish = null;
         NextState();    //result·Î State ÀüÈ¯
+    }
+
+    private void TryStunSnap(Vector2 direction)
+    {
+        if(direction.x > 0)
+        {
+            if(biteFish.transform.position.x < 0)
+            {
+                StunSnap(Mathf.Abs(biteFish.transform.position.x));
+            }
+        }
+        else
+        {
+            if (biteFish.transform.position.x > 0)
+            {
+                StunSnap(Mathf.Abs(biteFish.transform.position.x));
+            }
+        }
+    }
+
+    private void StunSnap(float power)
+    {
+
     }
 }

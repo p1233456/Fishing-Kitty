@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using DG.Tweening;
 
-public class Real : MonoBehaviour, IPointerEnterHandler
+public class Real : MonoBehaviour, IPointerEnterHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     bool isOn = false;
 
@@ -25,5 +26,24 @@ public class Real : MonoBehaviour, IPointerEnterHandler
     {
         isOn = true;
         Debug.Log("Real");
+    }
+
+    Vector2 dragStartPosition;
+
+    public void OnBeginDrag(PointerEventData pointerEventData)
+    {
+        dragStartPosition = transform.position;
+        Debug.Log(dragStartPosition);
+    }
+
+    public void OnEndDrag(PointerEventData pointerEventData)
+    {
+
+        transform.DOLocalMove(dragStartPosition, 1f);
+    }
+
+    public void OnDrag(PointerEventData pointerEventData)
+    {
+        transform.position = Input.mousePosition;
     }
 }
