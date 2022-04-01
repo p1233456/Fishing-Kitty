@@ -111,7 +111,7 @@ public class FishingManager : MonoBehaviour
             {
                 DamageFish();
                 lastFishingTime = Mathf.FloorToInt(fishingTime);
-                Debug.Log("경과 : " + lastFishingTime + "거리 : " + distance);
+                //Debug.Log("경과 : " + lastFishingTime + "거리 : " + distance);  
             }
             if(distance <= 0.1f)
             {
@@ -325,8 +325,8 @@ public class FishingManager : MonoBehaviour
     {
         Vector2 dir = new Vector2(biteFish.transform.position.x - landinPoint.transform.position.x,
             biteFish.transform.position.y - landinPoint.transform.position.y);
-        float angle = Mathf.Atan2(dir.y, dir.x);
-        rode.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        rode.transform.rotation = Quaternion.AngleAxis(angle - 90, new Vector3(0,0,1));
     }
 
     private void GetFish()

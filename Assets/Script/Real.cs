@@ -32,18 +32,23 @@ public class Real : MonoBehaviour, IPointerEnterHandler, IBeginDragHandler, IDra
 
     public void OnBeginDrag(PointerEventData pointerEventData)
     {
-        dragStartPosition = transform.position;
+        dragStartPosition = GetComponent<RectTransform>().anchoredPosition;
         Debug.Log(dragStartPosition);
     }
 
     public void OnEndDrag(PointerEventData pointerEventData)
     {
 
-        transform.DOLocalMove(dragStartPosition, 1f);
+        GetComponent<RectTransform>().anchoredPosition = dragStartPosition;
     }
 
     public void OnDrag(PointerEventData pointerEventData)
     {
-        transform.position = Input.mousePosition;
+        Vector2 mousePos = Input.mousePosition;
+        GetComponent<RectTransform>().position = new Vector2(Camera.main.ScreenToWorldPoint(mousePos).x,
+            Camera.main.ScreenToWorldPoint(mousePos).y);
+        //float w = transform_icon.rect.width;
+        //float h = transform_icon.rect.height;
+        //transform_icon.position = transform_cursor.position + (new Vector3(w, h) * 0.5f);
     }
 }

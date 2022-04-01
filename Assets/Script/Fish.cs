@@ -47,15 +47,15 @@ public class Fish : MonoBehaviour
     {
         if (FishingManager.Instance.gameState == GameState.Fighting && currentHP > 0)
         {
-            transform.Translate(new Vector3(1, 1, 0) * Time.deltaTime);
+            transform.Translate(new Vector3(0, 1, 0) * Time.deltaTime);
         }    
     }
 
     public void GetDamage(int damage)
     {
         currentHP -= damage;
-        Debug.Log("데미지 : " + damage);
-        Debug.Log("잔여 체력 : " + currentHP);
+        //Debug.Log("데미지 : " + damage);
+        //Debug.Log("잔여 체력 : " + currentHP);
         Instantiate(damageText, transform.position, Quaternion.identity).GetComponent<DamagePopUp>().SetDamage(damage);
     }
 
