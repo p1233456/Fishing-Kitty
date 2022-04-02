@@ -33,7 +33,7 @@ public class FishingManager : MonoBehaviour
     int lastFishingTime = 0;
     float fishingTime = 0f;  //경과 시간
 
-    Fish biteFish;
+    public Fish BiteFish { get; private set; }
 
     Dictionary<string, KeyValuePair<float, float>> stageProbability;
 
@@ -89,7 +89,8 @@ public class FishingManager : MonoBehaviour
     {
         if (gameState == GameState.Fighting)
         {
-            distance = Vector2.Distance(landinPoint.position, biteFish.transform.position);
+            MoveRode();
+            distance = Vector2.Distance(landinPoint.position, BiteFish.transform.position);
             fishingTime += Time.deltaTime;
             if (isRealling)
             {
@@ -117,7 +118,6 @@ public class FishingManager : MonoBehaviour
             {
                 GetFish();
             }
-            MoveRode();
         }
 
         if (Input.GetMouseButtonDown(0))
@@ -131,7 +131,7 @@ public class FishingManager : MonoBehaviour
         }
         if(gameState == GameState.Result)
         {
-            NextState();
+            
         }
     }
 
@@ -140,10 +140,10 @@ public class FishingManager : MonoBehaviour
         fishingTime = 0f;
         lastFishingTime = 0;
         gameState = GameState.Preparation;
-        if(biteFish != null)
+        if(BiteFish != null)
         {
-            Destroy(biteFish.gameObject);
-            biteFish = null;
+            Destroy(BiteFish.gameObject);
+            BiteFish = null;
         }
     }
 
@@ -199,9 +199,9 @@ public class FishingManager : MonoBehaviour
             if (random > probability.Value.Key && random < probability.Value.Value)
                 fishName = probability.Key;
         }
-        biteFish = Instantiate(fishShadow).GetComponent<Fish>();
-        biteFish.SetFish(fishName);
-        Debug.Log(biteFish.FishName);
+        BiteFish = Instantiate(fishShadow).GetComponent<Fish>();
+        BiteFish.SetFish(fishName);
+        Debug.Log(BiteFish.FishName);
     }
 
     private void SetStageProbability(string stageName)
@@ -274,7 +274,7 @@ public class FishingManager : MonoBehaviour
         }
         ZoomOut();
         Destroy(thrownFloat);
-        Debug.Log(biteFish.Size);
+        Debug.Log(BiteFish.Size);
         fishingTime = 0f;
         gameState = GameState.Fighting;
     }
@@ -297,7 +297,7 @@ public class FishingManager : MonoBehaviour
     public void Realling (){
         tensionRate += 1f * Time.deltaTime;
         MoveHandle();
-        biteFish.Move(landinPoint.position);
+        BiteFish.Move(landinPoint.position);
     }
 
     public void NotRealing()
@@ -313,26 +313,20 @@ public class FishingManager : MonoBehaviour
 
     private void DamageFish()
     {
-        biteFish.GetDamage(Mathf.FloorToInt(tensionRate * damage));
-    }
-
-    private void MoveFish()
-    {
-        
+        BiteFish.GetDamage(Mathf.FloorToInt(tensionRate * damage));
     }
 
     private void MoveRode()
     {
-        Vector2 dir = new Vector2(biteFish.transform.position.x - landinPoint.transform.position.x,
-            biteFish.transform.position.y - landinPoint.transform.position.y);
+        Vector2 dir = new Vector2(BiteFish.transform.position.x - landinPoint.transform.position.x,
+            BiteFish.transform.position.y - landinPoint.transform.position.y);
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         rode.transform.rotation = Quaternion.AngleAxis(angle - 90, new Vector3(0,0,1));
     }
 
     private void GetFish()
     {
-        Destroy(biteFish.gameObject);
-        biteFish = null;
+        Destroy(BiteFish.gameObject);
         NextState();    //result로 State 전환
     }
 
@@ -340,22 +334,22 @@ public class FishingManager : MonoBehaviour
     {
         if(direction.x > 0)
         {
-            if(biteFish.transform.position.x < 0)
+            if(BiteFish.transform.position.x < 0)
             {
-                StunSnap(Mathf.Abs(biteFish.transform.position.x));
+                StunSnap(Mathf.Abs(BiteFish.transform.position.x));
             }
         }
         else
         {
-            if (biteFish.transform.position.x > 0)
+            if (BiteFish.transform.position.x > 0)
             {
-                StunSnap(Mathf.Abs(biteFish.transform.position.x));
+                StunSnap(Mathf.Abs(BiteFish.transform.position.x));
             }
         }
     }
 
     private void StunSnap(float power)
     {
-
+        Debug.Log("스턴");
     }
 }

@@ -25,7 +25,6 @@ public class Real : MonoBehaviour, IPointerEnterHandler, IBeginDragHandler, IDra
     public void OnPointerEnter(PointerEventData pointerEventData)
     {
         isOn = true;
-        Debug.Log("Real");
     }
 
     Vector2 dragStartPosition;

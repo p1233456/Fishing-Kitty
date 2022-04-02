@@ -12,7 +12,8 @@ public class FishingUIManager : MonoBehaviour
     public GameObject[] resultUI;
 
     [SerializeField] private Image tensionImage;
-
+    [SerializeField] GameObject resultPanel;
+    
     private void Update()
     {
         //Debug.Log(FishingManager.Instance.gameState);
@@ -46,6 +47,7 @@ public class FishingUIManager : MonoBehaviour
                 Hide(hookingUI);
                 Hide(fightingUI);
                 Hide(preparationUI);
+                UpdateResult();
                 break;
         }
     }
@@ -79,5 +81,12 @@ public class FishingUIManager : MonoBehaviour
     private void ViewTensionGage()
     {
         tensionImage.fillAmount = FishingManager.Instance.TensionRate;
+    }
+
+    private void UpdateResult()
+    {
+        resultPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
+        resultPanel.GetComponent<ResultPanel>().SetPanel(FishingManager.Instance.BiteFish.FishName, 
+            FishingManager.Instance.BiteFish.Size, "A");
     }
 }
