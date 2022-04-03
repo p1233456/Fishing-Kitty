@@ -148,12 +148,3 @@ public static class FishingData
         }
     }
 }
-
-public class FishDataParser
-{
-    public FishData FishDataSetting(string fishName)
-    {
-        FishData data = new FishData();
-        return data;
-    }
-}

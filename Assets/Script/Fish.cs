@@ -19,6 +19,10 @@ public class Fish : MonoBehaviour
 
     [SerializeField] private GameObject damageText;
 
+    private Vector2 direction; 
+    Vector2 randDirection;
+     [SerializeField] float speed = 1f;
+
     public void SetFish(string fishName)
     {
         if (fishName == null)
@@ -45,17 +49,23 @@ public class Fish : MonoBehaviour
 
     private void Update()
     {
-        if (FishingManager.Instance.gameState == GameState.Fighting && currentHP > 0)
+        if (FishingManager.Instance.State == GameState.Fighting && currentHP > 0)
         {
-            transform.Translate(new Vector3(0, 1, 0) * Time.deltaTime);
-        }    
+            Debug.Log((direction.normalized + randDirection.normalized).normalized);
+            randDirection = new Vector2(Random.Range(-1, 1), 1);
+        }
+        else
+        {
+            randDirection = Vector2.zero;
+        }
+        transform.Translate((direction.normalized + randDirection.normalized).normalized * Time.deltaTime);
+        direction = Vector2.zero;
     }
 
     public void GetDamage(int damage)
     {
         currentHP -= damage;
-        //Debug.Log("데미지 : " + damage);
-        //Debug.Log("잔여 체력 : " + currentHP);
+        Debug.Log("데미지 : " + damage);
         Instantiate(damageText, transform.position, Quaternion.identity).GetComponent<DamagePopUp>().SetDamage(damage);
     }
 
@@ -67,8 +77,8 @@ public class Fish : MonoBehaviour
         }
     }
 
-    public void Move(Vector3 target)
+    public void Move(Vector2 target)
     {
-        transform.Translate((target - transform.position).normalized * Time.deltaTime);
+        direction = target - new Vector2(transform.position.x, transform.position.y);
     }
 }

@@ -38,6 +38,7 @@ public class Real : MonoBehaviour, IPointerEnterHandler, IBeginDragHandler, IDra
     public void OnEndDrag(PointerEventData pointerEventData)
     {
 
+        FishingManager.Instance.TryStunSnap(GetComponent<RectTransform>().anchoredPosition - dragStartPosition);
         GetComponent<RectTransform>().anchoredPosition = dragStartPosition;
     }
 

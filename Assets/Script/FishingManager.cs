@@ -21,25 +21,31 @@ public class FishingManager : MonoBehaviour
         get { return instance; }
     }
 
-    [SerializeField] private GameObject fishingFloat;
-    [SerializeField] private Transform floatPosition;
-    public GameState gameState;
-    private GameObject thrownFloat;
+    public GameState State { get; set; }
 
-    private Vector2 clickPoint;
-    private Vector2 unClickPoint;
-    private Sequence sequence;
+    #region 케스팅 관련 변수
+    [SerializeField] private GameObject fishingFloat;   //낚시 찌 프레펩
+    [SerializeField] private Transform floatPosition;   //찌 위치
+    private GameObject thrownFloat;                     //찌
+    private Sequence sequence;                          //두트윈 
+    #endregion
 
-    int lastFishingTime = 0;
-    float fishingTime = 0f;  //경과 시간
+    #region 후킹 관련 변수
+    #endregion
 
+    #region 파이팅 관련 변수
+    float distance;
+    [SerializeField] float fightingTime = 0f;  //경과 시간
+    #endregion
+
+    #region 결과 관련 변수
+    #endregion
     public Fish BiteFish { get; private set; }
 
     Dictionary<string, KeyValuePair<float, float>> stageProbability;
 
-    float tensionRate = 0f;
-    public float TensionRate { get { return tensionRate; } }
-    float maxTensionRate = 1f;
+    public float TensionRate { get; private set; }
+    public float MaxTensionRate { get; private set; }
 
     [SerializeField] Transform handle;
 
@@ -48,10 +54,10 @@ public class FishingManager : MonoBehaviour
     bool isRealling = false;
 
     [SerializeField] int damage;
+    float lastDamageTime = 0f;
 
     [SerializeField] GameObject fishShadow;
     [SerializeField] GameObject rode;
-    float distance;
     [SerializeField] Transform landinPoint;
 
     private void Awake()
@@ -61,133 +67,127 @@ public class FishingManager : MonoBehaviour
 
     private void Start()
     {
-        gameState = GameState.Preparation;
+        State = GameState.Preparation;
         SetStageProbability("UpStream");
-    }
-
-    private void NextState()
-    {
-        switch (gameState)
-        {
-            case GameState.Preparation:
-                gameState = GameState.Hooking;
-                break;
-            case GameState.Hooking:
-                tensionRate = 0f;
-                gameState = GameState.Fighting;
-                break;
-            case GameState.Fighting:
-                gameState = GameState.Result;
-                break;
-            case GameState.Result:
-                gameState = GameState.Preparation;
-                break;
-        }
     }
 
     private void Update()
     {
-        if (gameState == GameState.Fighting)
+        switch (State)
         {
-            MoveRode();
-            distance = Vector2.Distance(landinPoint.position, BiteFish.transform.position);
-            fishingTime += Time.deltaTime;
-            if (isRealling)
-            {
-                Realling();
-                if (Input.GetMouseButtonUp(0))
+            case GameState.Preparation:
+                break;
+            case GameState.Waiting:
+                break;
+            case GameState.Hooking:
+                if (Input.GetMouseButtonDown(0))
                 {
-                    RealingEnd();
+                    Hook();
                 }
-            }
-            else
-            {
-                NotRealing();
-            }
+                break;
+            case GameState.Fighting:
+                MoveRode();
+                distance = Vector2.Distance(landinPoint.position, BiteFish.transform.position);
+                fightingTime += Time.deltaTime;
 
-            if (tensionRate > maxTensionRate + 0.5f)
-                Fail();
+                //릴링중
+                if (isRealling)
+                {
+                    Realling();
+                    if (Input.GetMouseButtonUp(0))
+                    {
+                        RealingEnd();
+                    }
+                }
+                else
+                {
+                    NotRealing();
+                }
 
-            if (lastFishingTime + 1 < fishingTime)
-            {
-                DamageFish();
-                lastFishingTime = Mathf.FloorToInt(fishingTime);
-                //Debug.Log("경과 : " + lastFishingTime + "거리 : " + distance);  
-            }
-            if(distance <= 0.1f)
-            {
-                GetFish();
-            }
-        }
+                //텐션과다
+                if (TensionRate > MaxTensionRate + 0.2f)
+                {
+                    FisnishFighting();
+                    State = GameState.Preparation;
+                }
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (gameState == GameState.Hooking)
-                Hook();
-        }
-        if (Input.GetMouseButtonUp(0))
-        {
+                //1초 경과마다 데미지 주기
+                if (lastDamageTime + 1 < fightingTime)
+                {
+                    lastDamageTime = Mathf.FloorToInt(fightingTime);
+                    DamageFish();
+                }
 
-        }
-        if(gameState == GameState.Result)
-        {
-            
+                //거리가 가까워지면 물고기 잡기
+                if (distance <= 0.1f)
+                {
+                    FisnishFighting();
+                    State = GameState.Result;
+                }
+                break;
+            case GameState.Result:
+                break;
         }
     }
 
-    private void Fail()
+    //파이팅 종료
+    private void FisnishFighting()
     {
-        fishingTime = 0f;
-        lastFishingTime = 0;
-        gameState = GameState.Preparation;
+        lastDamageTime = 0f;
+        fightingTime = 0f;
+        TensionRate = 0f;
         if(BiteFish != null)
         {
             Destroy(BiteFish.gameObject);
-            BiteFish = null;
+            //BiteFish = null;
         }
+        rode.transform.rotation = Quaternion.Euler(Vector3.zero);
     }
 
+    //케스팅
     public void Casting()
     {
-        if (gameState != GameState.Preparation)
+        if (State != GameState.Preparation)
             return;
-        //Vector3 screenPos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10); 
-        //Vector3 worldPos = Camera.main.ScreenToWorldPoint(screenPos);
         thrownFloat = Instantiate(fishingFloat);
         thrownFloat.transform.position = floatPosition.position;
-        NextState();
-        ZoomIn();
+        State = GameState.Hooking;
+        ZoomInFloat();
     }
 
-    private void ZoomIn()
+    //찌 줌인
+    private void ZoomInFloat()
     {
         Camera.main.transform.DOLocalMove(new Vector3(floatPosition.transform.position.x, floatPosition.transform.position.y,
             Camera.main.transform.position.z), 1f).OnComplete(GetBite);
         Camera.main.DOOrthoSize(3, 1f);
     }
 
-    private void ZoomOut()
+    //찌 줌아웃
+    private void ZoomOutFloat()
     {
         Camera.main.transform.DOLocalMove(new Vector3(0, 0,
               Camera.main.transform.position.z), 1f);
         Camera.main.DOOrthoSize(10, 1f);
     }
 
-    //최대 내려가는거 2
+    //물고기가 미끼 물었을때
     private void GetBite()
     {
+        //최대 내려가는거 2
         sequence = DOTween.Sequence();
         sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y - 1, 0.5f));
         sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y, 0.5f));
         sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y - 1, 0.5f));
         sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y, 0.5f));
         sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y - 2, 0.5f));
-        sequence.OnComplete(HookingMiss);
+        sequence.OnComplete(HookingFail);
         sequence.Play();
 
         GetRandomFish();
     }
 
+    //확률에 따른 물고기 배정
     private void GetRandomFish()
     {
         float random = Random.Range(0f, 1f);
@@ -204,6 +204,7 @@ public class FishingManager : MonoBehaviour
         Debug.Log(BiteFish.FishName);
     }
 
+    //스테이지 확률 테이블 세팅
     private void SetStageProbability(string stageName)
     {
         stageProbability = new Dictionary<string, KeyValuePair<float, float>>();
@@ -223,12 +224,12 @@ public class FishingManager : MonoBehaviour
         }
     }
 
+    //후킹 시도
     public void Hook()
     {
         sequence.Pause();
+        sequence.Kill();
         float hookPoint = floatPosition.position.y - thrownFloat.transform.position.y;
-        Debug.Log(hookPoint);
-        Debug.Log(floatPosition.position.y + " " + thrownFloat.transform.position.y);
         if (hookPoint > 1.5f)
         {
             Debug.Log("perfect");
@@ -247,62 +248,74 @@ public class FishingManager : MonoBehaviour
         else
         {
             Debug.Log("miss");
-            HookingMiss();
+            HookingFail();
         }
     }
 
-    private void HookingMiss()
+    //후킹 실패
+    private void HookingFail()
     {
-        gameState = GameState.Preparation;
-        ZoomOut();
+        ZoomOutFloat();
         sequence.Kill();
         DestroyImmediate(thrownFloat, true);
-        Fail();
+        FisnishFighting();
+        State = GameState.Preparation;
     }
 
+    //후킹 성공
     private void HookingSuccess(int level)
     {
-        NextState();
+        State = GameState.Fighting;
         switch (level)
         {
             case 0: //perfect
+                SetMaxTensionRate(1f);
                 break;
             case 1: //great
+                SetMaxTensionRate(0.8f);
                 break;
             case 2: //good
+                SetMaxTensionRate(0.6f);
                 break;
         }
-        ZoomOut();
+        ZoomOutFloat();
         Destroy(thrownFloat);
-        Debug.Log(BiteFish.Size);
-        fishingTime = 0f;
-        gameState = GameState.Fighting;
+        //Debug.Log(BiteFish.Size);
+        fightingTime = 0f;
+        State = GameState.Fighting;
     }
 
+    //최대 텐션 설정
     private void SetMaxTensionRate(float maxTension)
     {
-        this.maxTensionRate = maxTension;
+        this.MaxTensionRate = maxTension;
     }
 
+    //릴링 시작
     public void RealingStart()
     {
         isRealling = true;
     }
 
+    //릴링 중단
     public void RealingEnd()
     {
         isRealling = false;
     }
-
-    public void Realling (){
-        tensionRate += 1f * Time.deltaTime;
+    
+    //릴링
+    private void Realling (){
+        TensionRate += 1f * Time.deltaTime;
         MoveHandle();
         BiteFish.Move(landinPoint.position);
     }
 
-    public void NotRealing()
+    //릴링중이 아닐때
+    private void NotRealing()
     {
-        tensionRate -= 0.5f * Time.deltaTime;
+        if (TensionRate > 0f) {
+            TensionRate -= 0.5f * Time.deltaTime;
+        }
     }
 
     private void MoveHandle()
@@ -311,11 +324,13 @@ public class FishingManager : MonoBehaviour
         handle.RotateAround(rotatePoint.position, Vector3.back, 10f);
     }
 
+    //물고기에게 데미지
     private void DamageFish()
     {
-        BiteFish.GetDamage(Mathf.FloorToInt(tensionRate * damage));
+        BiteFish.GetDamage(Mathf.FloorToInt(TensionRate * damage));
     }
 
+    //Rode 움직임
     private void MoveRode()
     {
         Vector2 dir = new Vector2(BiteFish.transform.position.x - landinPoint.transform.position.x,
@@ -324,13 +339,7 @@ public class FishingManager : MonoBehaviour
         rode.transform.rotation = Quaternion.AngleAxis(angle - 90, new Vector3(0,0,1));
     }
 
-    private void GetFish()
-    {
-        Destroy(BiteFish.gameObject);
-        NextState();    //result로 State 전환
-    }
-
-    private void TryStunSnap(Vector2 direction)
+    public void TryStunSnap(Vector2 direction)
     {
         if(direction.x > 0)
         {
@@ -351,5 +360,17 @@ public class FishingManager : MonoBehaviour
     private void StunSnap(float power)
     {
         Debug.Log("스턴");
+    }
+
+    public void CloseResultPannel ()
+    {
+        State = GameState.Preparation; 
+        fightingTime = 0f;
+        State = GameState.Preparation;
+        if (BiteFish != null)
+        {
+            Destroy(BiteFish.gameObject);
+            BiteFish = null;
+        }
     }
 }

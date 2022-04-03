@@ -16,8 +16,8 @@ public class FishingUIManager : MonoBehaviour
     
     private void Update()
     {
-        //Debug.Log(FishingManager.Instance.gameState);
-        switch (FishingManager.Instance.gameState)
+        //Debug.Log(FishingManager.Instance.State);
+        switch (FishingManager.Instance.State)
         {
             case GameState.Preparation:
                 Appear(preparationUI);
@@ -80,10 +80,13 @@ public class FishingUIManager : MonoBehaviour
 
     private void ViewTensionGage()
     {
-        tensionImage.fillAmount = FishingManager.Instance.TensionRate;
+        if(FishingManager.Instance.TensionRate < FishingManager.Instance.MaxTensionRate)
+        {
+            tensionImage.fillAmount = FishingManager.Instance.TensionRate;
+        }
     }
 
-    private void UpdateResult()
+        private void UpdateResult()
     {
         resultPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
         resultPanel.GetComponent<ResultPanel>().SetPanel(FishingManager.Instance.BiteFish.FishName, 

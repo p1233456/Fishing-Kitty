@@ -12,7 +12,8 @@ public class ResultPanel : MonoBehaviour
 
     public void SetPanel(string fishName, float length, string freshMentClass)
     {
-        image.sprite = Resources.Load("fishName.png") as Sprite;
+        Sprite test = Resources.Load<Sprite>("FishSprites/" + fishName);
+        image.sprite = Resources.Load<Sprite>("FishSprites/" + fishName);
         this.fishName.text = fishName;
         this.length.text = length.ToString();
         this.freshMent.text = freshMentClass;
