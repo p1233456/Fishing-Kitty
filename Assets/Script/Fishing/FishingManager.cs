@@ -105,7 +105,14 @@ public class FishingManager : MonoBehaviour
                 }
 
                 //텐션과다
-                if (TensionRate > MaxTensionRate + 0.2f)
+                //Debug.Log(BiteFish.HPRate);
+                if (TensionRate > MaxTensionRate + 0.2f && BiteFish.HPRate > 0)
+                {
+                    FisnishFighting();
+                    State = GameState.Preparation;
+                }
+                //텐션과소
+                if (TensionRate < -0.2f && BiteFish.HPRate > 0)
                 {
                     FisnishFighting();
                     State = GameState.Preparation;
@@ -234,16 +241,19 @@ public class FishingManager : MonoBehaviour
         {
             Debug.Log("perfect");
             HookingSuccess(0);
+            FishingUIManager.Instance.ViewHookTiming("perfect");
         }
         else if (hookPoint > 1f)
         {
             Debug.Log("great");
             HookingSuccess(1);
+            FishingUIManager.Instance.ViewHookTiming("great");
         }
         else if (hookPoint > 0.5f)
         {
             Debug.Log("good");
             HookingSuccess(2);
+            FishingUIManager.Instance.ViewHookTiming("good");
         }
         else
         {
@@ -282,6 +292,7 @@ public class FishingManager : MonoBehaviour
         Destroy(thrownFloat);
         //Debug.Log(BiteFish.Size);
         fightingTime = 0f;
+        TensionRate = 0.3f;
         State = GameState.Fighting;
     }
 
@@ -313,9 +324,7 @@ public class FishingManager : MonoBehaviour
     //릴링중이 아닐때
     private void NotRealing()
     {
-        if (TensionRate > 0f) {
-            TensionRate -= 0.5f * Time.deltaTime;
-        }
+        TensionRate -= 0.5f * Time.deltaTime;
     }
 
     private void MoveHandle()
@@ -359,6 +368,7 @@ public class FishingManager : MonoBehaviour
 
     private void StunSnap(float power)
     {
+        BiteFish.GetDamage(Mathf.FloorToInt(power));
         Debug.Log("스턴");
     }
 

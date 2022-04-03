@@ -96,3 +96,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damageText: {fileID: 6055044288248565811, guid: 49e735419510cc54db7858d4dbbd2abe, type: 3}
+  leftSprite: {fileID: 21300000, guid: b5fc8621941d2024c85c76bdf12971cf, type: 3}
+  rightSprite: {fileID: 0}

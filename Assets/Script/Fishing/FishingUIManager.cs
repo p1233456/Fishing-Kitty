@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class FishingUIManager : MonoBehaviour
 {
+    public static FishingUIManager Instance { get; private set; }
     public GameObject[] preparationUI;
     public GameObject[] castingUI;
     public GameObject[] hookingUI;
@@ -13,7 +14,13 @@ public class FishingUIManager : MonoBehaviour
 
     [SerializeField] private Image tensionImage;
     [SerializeField] GameObject resultPanel;
-    
+    [SerializeField] Text timingText;
+
+    private void Awake()
+    {
+        Instance = this;        
+    }
+
     private void Update()
     {
         //Debug.Log(FishingManager.Instance.State);
@@ -86,10 +93,21 @@ public class FishingUIManager : MonoBehaviour
         }
     }
 
-        private void UpdateResult()
+    private void UpdateResult()
     {
         resultPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
         resultPanel.GetComponent<ResultPanel>().SetPanel(FishingManager.Instance.BiteFish.FishName, 
             FishingManager.Instance.BiteFish.Size, "A");
+    }
+
+    public void ViewHookTiming(string result)
+    {
+        timingText.text = result;
+        Invoke("HideTimingText", 0.5f);
+    }
+
+    private void HideTimingText()
+    {
+        timingText.gameObject.SetActive(false);
     }
 }
