@@ -16,9 +16,13 @@ public class FishingUIManager : MonoBehaviour
     [SerializeField] GameObject resultPanel;
     [SerializeField] Text timingText;
 
+    [SerializeField] GameObject retryPannel;
+    [SerializeField] GameObject bitePannel;
     private void Awake()
     {
-        Instance = this;        
+        Instance = this;
+        HideRetryButton();
+        HideBitePanel();
     }
 
     private void Update()
@@ -109,5 +113,27 @@ public class FishingUIManager : MonoBehaviour
     private void HideTimingText()
     {
         timingText.gameObject.SetActive(false);
+    }
+
+    public void ViewRetryButton()
+    {
+        retryPannel.SetActive(true);
+        Time.timeScale = 0;
+    }
+
+    public void HideRetryButton()
+    {
+        retryPannel.SetActive(false);
+        Time.timeScale = 1;
+    }
+
+    public void ViewBitePanel()
+    {
+        bitePannel.SetActive(true);
+    }
+
+    public void HideBitePanel()
+    {
+        bitePannel.SetActive(false);
     }
 }

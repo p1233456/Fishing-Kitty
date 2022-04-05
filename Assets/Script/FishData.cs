@@ -43,6 +43,20 @@ public static class FishingData
                 column.Unique = false;
                 upStream.Columns.Add(column);
 
+                column = new DataColumn();
+                column.DataType = System.Type.GetType("System.Single");
+                column.ColumnName = "Bite 1";
+                column.ReadOnly = true;
+                column.Unique = false;
+                upStream.Columns.Add(column);
+
+                column = new DataColumn();
+                column.DataType = System.Type.GetType("System.Single");
+                column.ColumnName = "Bite 2";
+                column.ReadOnly = true;
+                column.Unique = false;
+                upStream.Columns.Add(column);
+
 
                 DataRow row;
                 var dataSet = CSVParser.Read("DataTable/UpStream");
@@ -50,7 +64,9 @@ public static class FishingData
                 {
                     row = upStream.NewRow();
                     row["Name"] = data.Key.ToString();
-                    row["Probability"] = float.Parse(data.Value["Probability"].ToString().Replace('%',' ')) / 100f;
+                    row["Probability"] = float.Parse(data.Value["Probability"].ToString().Replace('%', ' ')) / 100f;
+                    row["Bite 1"] = float.Parse(data.Value["Bite 1"].ToString().Replace('%', ' ')) / 100f;
+                    row["Bite 2"] = float.Parse(data.Value["Bite 2"].ToString().Replace('%', ' ')) / 100f;
                     upStream.Rows.Add(row);
                 }
 

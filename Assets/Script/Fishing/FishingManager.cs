@@ -10,7 +10,8 @@ public enum GameState
     Waiting,
     Hooking,
     Fighting,
-    Result
+    Result,
+    Fail
 }
 
 public class FishingManager : MonoBehaviour
@@ -60,6 +61,8 @@ public class FishingManager : MonoBehaviour
     [SerializeField] GameObject rode;
     [SerializeField] Transform landinPoint;
 
+    public string SelectedBite { get; set; }
+
     private void Awake()
     {
         instance = this;
@@ -68,6 +71,7 @@ public class FishingManager : MonoBehaviour
     private void Start()
     {
         State = GameState.Preparation;
+        SelectedBite = "Bite 1";
         SetStageProbability("UpStream");
     }
 
@@ -108,14 +112,12 @@ public class FishingManager : MonoBehaviour
                 //Debug.Log(BiteFish.HPRate);
                 if (TensionRate > MaxTensionRate + 0.2f && BiteFish.HPRate > 0)
                 {
-                    FisnishFighting();
-                    State = GameState.Preparation;
+                    FailFishing();
                 }
                 //텐션과소
                 if (TensionRate < -0.2f && BiteFish.HPRate > 0)
                 {
-                    FisnishFighting();
-                    State = GameState.Preparation;
+                    FailFishing();
                 }
 
                 //1초 경과마다 데미지 주기
@@ -128,8 +130,7 @@ public class FishingManager : MonoBehaviour
                 //거리가 가까워지면 물고기 잡기
                 if (distance <= 0.1f)
                 {
-                    FisnishFighting();
-                    State = GameState.Result;
+                    SuccessFishing();
                 }
                 break;
             case GameState.Result:
@@ -137,8 +138,36 @@ public class FishingManager : MonoBehaviour
         }
     }
 
+    private void FailFishing()
+    {
+        State = GameState.Fail;
+        FishingUIManager.Instance.ViewRetryButton();
+    }
+
+    public void Retry()
+    {
+        HookingSuccess(0);
+        lastDamageTime = 0f;
+        fightingTime = 0f;
+        TensionRate = 0.3f;
+        State = GameState.Fighting;
+        rode.transform.rotation = Quaternion.Euler(Vector3.zero);
+    }
+
+    public void DiscarRetry()
+    {
+        State = GameState.Preparation;
+        FinishFighting();
+    }
+
+    private void SuccessFishing()
+    {
+        State = GameState.Result;
+        FinishFighting();
+    }
+
     //파이팅 종료
-    private void FisnishFighting()
+    public void FinishFighting()
     {
         lastDamageTime = 0f;
         fightingTime = 0f;
@@ -190,7 +219,6 @@ public class FishingManager : MonoBehaviour
         sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y - 2, 0.5f));
         sequence.OnComplete(HookingFail);
         sequence.Play();
-
         GetRandomFish();
     }
 
@@ -203,16 +231,16 @@ public class FishingManager : MonoBehaviour
 
         foreach (var probability in stageProbability)
         {
-            if (random > probability.Value.Key && random < probability.Value.Value)
+            if (random >= probability.Value.Key && random < probability.Value.Value)
                 fishName = probability.Key;
         }
+        Debug.Log(fishName);
         BiteFish = Instantiate(fishShadow).GetComponent<Fish>();
         BiteFish.SetFish(fishName);
-        Debug.Log(BiteFish.FishName);
     }
 
     //스테이지 확률 테이블 세팅
-    private void SetStageProbability(string stageName)
+    public void SetStageProbability(string stageName)
     {
         stageProbability = new Dictionary<string, KeyValuePair<float, float>>();
         float amount = 0;
@@ -221,8 +249,8 @@ public class FishingManager : MonoBehaviour
             case "UpStream":
                 foreach (var row in FishingData.UpStream.AsEnumerable())
                 {
-                    stageProbability.Add(row.Field<string>("Name"), new KeyValuePair<float, float>(amount, amount + row.Field<float>("Probability")));
-                    amount += row.Field<float>("Probability");
+                    stageProbability.Add(row.Field<string>("Name"), new KeyValuePair<float, float>(amount, amount + row.Field<float>(SelectedBite)));
+                    amount += row.Field<float>(SelectedBite);
                 }
                 break;
             default:
@@ -268,7 +296,7 @@ public class FishingManager : MonoBehaviour
         ZoomOutFloat();
         sequence.Kill();
         DestroyImmediate(thrownFloat, true);
-        FisnishFighting();
+        FinishFighting();
         State = GameState.Preparation;
     }
 
@@ -366,12 +394,14 @@ public class FishingManager : MonoBehaviour
         }
     }
 
+    //스턴 시키기
     private void StunSnap(float power)
     {
         BiteFish.GetDamage(Mathf.FloorToInt(power));
         Debug.Log("스턴");
     }
 
+    //결과창 닫기
     public void CloseResultPannel ()
     {
         State = GameState.Preparation; 

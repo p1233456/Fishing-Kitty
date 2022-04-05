@@ -56,7 +56,7 @@ public class Fish : MonoBehaviour
     {
         if (FishingManager.Instance.State == GameState.Fighting && currentHP > 0)
         {
-            Debug.Log((randDirection));
+            //Debug.Log((randDirection));
         }
         else
         {
