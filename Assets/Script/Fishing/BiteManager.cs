@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-//¹Ì³¢ °ü¸®
+//ë¯¸ë¼ ê´€ë¦¬
 public class BiteManager : MonoBehaviour
 {
     public void SelectBite(string bite)
     {
         FishingManager.Instance.SelectedBite = bite;
-        //ÃßÈÄ º¯°æ
+        //ì¶”í›„ ë³€ê²½
         FishingManager.Instance.SetStageProbability("UpStream");
     }
     public void UseBite(string bite)

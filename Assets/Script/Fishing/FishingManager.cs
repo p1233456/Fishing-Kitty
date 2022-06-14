@@ -24,22 +24,22 @@ public class FishingManager : MonoBehaviour
 
     public GameState State { get; set; }
 
-    #region ÄÉ½ºÆÃ °ü·Ã º¯¼ö
-    [SerializeField] private GameObject fishingFloat;   //³¬½Ã Âî ÇÁ·¹Æé
-    [SerializeField] private Transform floatPosition;   //Âî À§Ä¡
-    private GameObject thrownFloat;                     //Âî
-    private Sequence sequence;                          //µÎÆ®À© 
+    #region ì¼€ìŠ¤íŒ… ê´€ë ¨ ë³€ìˆ˜
+    [SerializeField] private GameObject fishingFloat;   //ë‚šì‹œ ì°Œ í”„ë ˆí©
+    [SerializeField] private Transform floatPosition;   //ì°Œ ìœ„ì¹˜
+    private GameObject thrownFloat;                     //ì°Œ
+    private Sequence sequence;                          //ë‘íŠ¸ìœˆ 
     #endregion
 
-    #region ÈÄÅ· °ü·Ã º¯¼ö
+    #region í›„í‚¹ ê´€ë ¨ ë³€ìˆ˜
     #endregion
 
-    #region ÆÄÀÌÆÃ °ü·Ã º¯¼ö
+    #region íŒŒì´íŒ… ê´€ë ¨ ë³€ìˆ˜
     float distance;
-    [SerializeField] float fightingTime = 0f;  //°æ°ú ½Ã°£
+    [SerializeField] float fightingTime = 0f;  //ê²½ê³¼ ì‹œê°„
     #endregion
 
-    #region °á°ú °ü·Ã º¯¼ö
+    #region ê²°ê³¼ ê´€ë ¨ ë³€ìˆ˜
     #endregion
     public Fish BiteFish { get; private set; }
 
@@ -94,7 +94,7 @@ public class FishingManager : MonoBehaviour
                 distance = Vector2.Distance(landinPoint.position, BiteFish.transform.position);
                 fightingTime += Time.deltaTime;
 
-                //¸±¸µÁß
+                //ë¦´ë§ì¤‘
                 if (isRealling)
                 {
                     Realling();
@@ -108,26 +108,26 @@ public class FishingManager : MonoBehaviour
                     NotRealing();
                 }
 
-                //ÅÙ¼Ç°ú´Ù
+                //í…ì…˜ê³¼ë‹¤
                 //Debug.Log(BiteFish.HPRate);
                 if (TensionRate > MaxTensionRate + 0.2f && BiteFish.HPRate > 0)
                 {
                     FailFishing();
                 }
-                //ÅÙ¼Ç°ú¼Ò
+                //í…ì…˜ê³¼ì†Œ
                 if (TensionRate < -0.2f && BiteFish.HPRate > 0)
                 {
                     FailFishing();
                 }
 
-                //1ÃÊ °æ°ú¸¶´Ù µ¥¹ÌÁö ÁÖ±â
+                //1ì´ˆ ê²½ê³¼ë§ˆë‹¤ ë°ë¯¸ì§€ ì£¼ê¸°
                 if (lastDamageTime + 1 < fightingTime)
                 {
                     lastDamageTime = Mathf.FloorToInt(fightingTime);
                     DamageFish();
                 }
 
-                //°Å¸®°¡ °¡±î¿öÁö¸é ¹°°í±â Àâ±â
+                //ê±°ë¦¬ê°€ ê°€ê¹Œì›Œì§€ë©´ ë¬¼ê³ ê¸° ì¡ê¸°
                 if (distance <= 0.1f)
                 {
                     SuccessFishing();
@@ -166,7 +166,7 @@ public class FishingManager : MonoBehaviour
         FinishFighting();
     }
 
-    //ÆÄÀÌÆÃ Á¾·á
+    //íŒŒì´íŒ… ì¢…ë£Œ
     public void FinishFighting()
     {
         lastDamageTime = 0f;
@@ -180,7 +180,7 @@ public class FishingManager : MonoBehaviour
         rode.transform.rotation = Quaternion.Euler(Vector3.zero);
     }
 
-    //ÄÉ½ºÆÃ
+    //ì¼€ìŠ¤íŒ…
     public void Casting()
     {
         if (State != GameState.Preparation)
@@ -191,7 +191,7 @@ public class FishingManager : MonoBehaviour
         ZoomInFloat();
     }
 
-    //Âî ÁÜÀÎ
+    //ì°Œ ì¤Œì¸
     private void ZoomInFloat()
     {
         Camera.main.transform.DOLocalMove(new Vector3(floatPosition.transform.position.x, floatPosition.transform.position.y,
@@ -199,7 +199,7 @@ public class FishingManager : MonoBehaviour
         Camera.main.DOOrthoSize(3, 1f);
     }
 
-    //Âî ÁÜ¾Æ¿ô
+    //ì°Œ ì¤Œì•„ì›ƒ
     private void ZoomOutFloat()
     {
         Camera.main.transform.DOLocalMove(new Vector3(0, 0,
@@ -207,10 +207,10 @@ public class FishingManager : MonoBehaviour
         Camera.main.DOOrthoSize(10, 1f);
     }
 
-    //¹°°í±â°¡ ¹Ì³¢ ¹°¾úÀ»¶§
+    //ë¬¼ê³ ê¸°ê°€ ë¯¸ë¼ ë¬¼ì—ˆì„ë•Œ
     private void GetBite()
     {
-        //ÃÖ´ë ³»·Á°¡´Â°Å 2
+        //ìµœëŒ€ ë‚´ë ¤ê°€ëŠ”ê±° 2
         sequence = DOTween.Sequence();
         sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y - 1, 0.5f));
         sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y, 0.5f));
@@ -222,7 +222,7 @@ public class FishingManager : MonoBehaviour
         GetRandomFish();
     }
 
-    //È®·ü¿¡ µû¸¥ ¹°°í±â ¹èÁ¤
+    //í™•ë¥ ì— ë”°ë¥¸ ë¬¼ê³ ê¸° ë°°ì •
     private void GetRandomFish()
     {
         float random = Random.Range(0f, 1f);
@@ -239,7 +239,7 @@ public class FishingManager : MonoBehaviour
         BiteFish.SetFish(fishName);
     }
 
-    //½ºÅ×ÀÌÁö È®·ü Å×ÀÌºí ¼¼ÆÃ
+    //ìŠ¤í…Œì´ì§€ í™•ë¥  í…Œì´ë¸” ì„¸íŒ…
     public void SetStageProbability(string stageName)
     {
         stageProbability = new Dictionary<string, KeyValuePair<float, float>>();
@@ -254,12 +254,12 @@ public class FishingManager : MonoBehaviour
                 }
                 break;
             default:
-                Debug.Log("Àß¸øµÈ ½ºÅ×ÀÌÁö¸í ÀÔ·Â");
+                Debug.Log("ì˜ëª»ëœ ìŠ¤í…Œì´ì§€ëª… ì…ë ¥");
                 break;
         }
     }
 
-    //ÈÄÅ· ½Ãµµ
+    //í›„í‚¹ ì‹œë„
     public void Hook()
     {
         sequence.Pause();
@@ -290,7 +290,7 @@ public class FishingManager : MonoBehaviour
         }
     }
 
-    //ÈÄÅ· ½ÇÆĞ
+    //í›„í‚¹ ì‹¤íŒ¨
     private void HookingFail()
     {
         ZoomOutFloat();
@@ -300,7 +300,7 @@ public class FishingManager : MonoBehaviour
         State = GameState.Preparation;
     }
 
-    //ÈÄÅ· ¼º°ø
+    //í›„í‚¹ ì„±ê³µ
     private void HookingSuccess(int level)
     {
         State = GameState.Fighting;
@@ -324,32 +324,32 @@ public class FishingManager : MonoBehaviour
         State = GameState.Fighting;
     }
 
-    //ÃÖ´ë ÅÙ¼Ç ¼³Á¤
+    //ìµœëŒ€ í…ì…˜ ì„¤ì •
     private void SetMaxTensionRate(float maxTension)
     {
         this.MaxTensionRate = maxTension;
     }
 
-    //¸±¸µ ½ÃÀÛ
+    //ë¦´ë§ ì‹œì‘
     public void RealingStart()
     {
         isRealling = true;
     }
 
-    //¸±¸µ Áß´Ü
+    //ë¦´ë§ ì¤‘ë‹¨
     public void RealingEnd()
     {
         isRealling = false;
     }
     
-    //¸±¸µ
+    //ë¦´ë§
     private void Realling (){
         TensionRate += 1f * Time.deltaTime;
         MoveHandle();
         BiteFish.Move(landinPoint.position);
     }
 
-    //¸±¸µÁßÀÌ ¾Æ´Ò¶§
+    //ë¦´ë§ì¤‘ì´ ì•„ë‹ë•Œ
     private void NotRealing()
     {
         TensionRate -= 0.5f * Time.deltaTime;
@@ -361,13 +361,13 @@ public class FishingManager : MonoBehaviour
         handle.RotateAround(rotatePoint.position, Vector3.back, 10f);
     }
 
-    //¹°°í±â¿¡°Ô µ¥¹ÌÁö
+    //ë¬¼ê³ ê¸°ì—ê²Œ ë°ë¯¸ì§€
     private void DamageFish()
     {
         BiteFish.GetDamage(Mathf.FloorToInt(TensionRate * damage));
     }
 
-    //Rode ¿òÁ÷ÀÓ
+    //Rode ì›€ì§ì„
     private void MoveRode()
     {
         Vector2 dir = new Vector2(BiteFish.transform.position.x - landinPoint.transform.position.x,
@@ -394,14 +394,14 @@ public class FishingManager : MonoBehaviour
         }
     }
 
-    //½ºÅÏ ½ÃÅ°±â
+    //ìŠ¤í„´ ì‹œí‚¤ê¸°
     private void StunSnap(float power)
     {
         BiteFish.GetDamage(Mathf.FloorToInt(power));
-        Debug.Log("½ºÅÏ");
+        Debug.Log("ìŠ¤í„´");
     }
 
-    //°á°úÃ¢ ´İ±â
+    //ê²°ê³¼ì°½ ë‹«ê¸°
     public void CloseResultPannel ()
     {
         State = GameState.Preparation; 

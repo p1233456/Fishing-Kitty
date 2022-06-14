@@ -20,7 +20,7 @@ public class RewardedAdsButton : MonoBehaviour, IUnityAdsLoadListener, IUnityAds
         _adUnitId = _androidAdUnitId;
 #elif UNITY_EDITOR	
 #endif
-        Debug.Log("�ʱ�ȭ �Ϸ�");
+        Debug.Log("초기화 완료");
         _adUnitId = _androidAdUnitId;
 
         //Disable the button until the ad is ready to show:

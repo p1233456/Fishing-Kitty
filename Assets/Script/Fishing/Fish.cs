@@ -30,7 +30,7 @@ public class Fish : MonoBehaviour
     {
         if (fishName == null)
         {
-            Debug.LogError("Àß¸øµÈ ¹°°í±â¸í ÀÔ·Â");
+            Debug.LogError("ì˜ëª»ëœ ë¬¼ê³ ê¸°ëª… ì…ë ¥");
             return;
         }
         this.fishName = fishName;
@@ -63,7 +63,7 @@ public class Fish : MonoBehaviour
             randDirection = Vector2.zero;
         }
 
-        //°¡´Â¹æÇâ ¹Ù¶óº¸±â
+        //ê°€ëŠ”ë°©í–¥ ë°”ë¼ë³´ê¸°
         if(randDirection.normalized.x > 0)
         {
             spriteRenderer.sprite = rightSprite;
@@ -90,7 +90,7 @@ public class Fish : MonoBehaviour
         if (currentHP > 0)
         {
             currentHP -= damage;
-            //Debug.Log("µ¥¹ÌÁö : " + damage);
+            //Debug.Log("ë°ë¯¸ì§€ : " + damage);
             Instantiate(damageText, transform.position, Quaternion.identity).GetComponent<DamagePopUp>().SetDamage(damage);
         }
     }

@@ -10,7 +10,7 @@ public class MapManager : MonoBehaviour
         SceneManager.LoadScene("Title");
     }
 
-    //½ºÅ×ÀÌÁö·Î ÀÌµ¿
+    //ìŠ¤í…Œì´ì§€ë¡œ ì´ë™
     public void LoadStage(string stageName)
     {
         if (CheckCanMoveStage(stageName))
@@ -19,7 +19,7 @@ public class MapManager : MonoBehaviour
         }
     }
 
-    //ÀÌµ¿ °¡´ÉÇÑ ½ºÅ×ÀÌÁöÀÎÁö Ã¼Å©
+    //ì´ë™ ê°€ëŠ¥í•œ ìŠ¤í…Œì´ì§€ì¸ì§€ ì²´í¬
     private bool CheckCanMoveStage(string stageName)
     {
         return true;
