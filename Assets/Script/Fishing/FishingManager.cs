@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using System.Data;
+using System.Linq;
+using System.Data;
 
 public enum GameState
 {
@@ -25,10 +27,11 @@ public class FishingManager : MonoBehaviour
     public GameState State { get; set; }
 
     #region 케스팅 관련 변수
-    [SerializeField] private GameObject fishingFloat;   //낚시 찌 프레펩
+    [SerializeField] private GameObject[] fishingFloats;   //낚시 찌 프레펩
     [SerializeField] private Transform floatPosition;   //찌 위치
     private GameObject thrownFloat;                     //찌
-    private Sequence sequence;                          //두트윈 
+
+    [SerializeField] private Transform rodePosition;
     #endregion
 
     #region 후킹 관련 변수
@@ -58,10 +61,12 @@ public class FishingManager : MonoBehaviour
     float lastDamageTime = 0f;
 
     [SerializeField] GameObject fishShadow;
-    [SerializeField] GameObject rode;
+    [SerializeField] Rode rode;
     [SerializeField] Transform landinPoint;
 
     public string SelectedBite { get; set; }
+
+    private float? previousAngle = null;
 
     private void Awake()
     {
@@ -90,10 +95,10 @@ public class FishingManager : MonoBehaviour
                 }
                 break;
             case GameState.Fighting:
-                MoveRode();
-                distance = Vector2.Distance(landinPoint.position, BiteFish.transform.position);
+                CameraControl();
+                rode.Move(BiteFish.transform.position);
+                distance = Vector3.Distance(landinPoint.position, BiteFish.transform.position);
                 fightingTime += Time.deltaTime;
-
                 //릴링중
                 if (isRealling)
                 {
@@ -154,7 +159,7 @@ public class FishingManager : MonoBehaviour
         rode.transform.rotation = Quaternion.Euler(Vector3.zero);
     }
 
-    public void DiscarRetry()
+    public void DiscardRetry()
     {
         State = GameState.Preparation;
         FinishFighting();
@@ -163,6 +168,11 @@ public class FishingManager : MonoBehaviour
     private void SuccessFishing()
     {
         State = GameState.Result;
+        MissionManager.Instance.MissionFishCheck(BiteFish.FishName);
+        int price = (from row in FishingData.FishDataTable.AsEnumerable()
+                                              where (string)row["Name"] == BiteFish.FishName
+                                              select row.Field<int>("Price")).ElementAt<int>(0);
+        FishingUIManager.Instance.SetPrice(price);
         FinishFighting();
     }
 
@@ -177,7 +187,7 @@ public class FishingManager : MonoBehaviour
             Destroy(BiteFish.gameObject);
             //BiteFish = null;
         }
-        rode.transform.rotation = Quaternion.Euler(Vector3.zero);
+        rode.transform.rotation = Quaternion.Euler(new Vector3(36,0,rode.transform.rotation.z));
     }
 
     //케스팅
@@ -185,7 +195,10 @@ public class FishingManager : MonoBehaviour
     {
         if (State != GameState.Preparation)
             return;
-        thrownFloat = Instantiate(fishingFloat);
+        if (PlayerPrefs.GetInt(SelectedBite,0) < 1)
+            return;
+        UseBite(SelectedBite);
+        thrownFloat = Instantiate(fishingFloats[Random.Range(0,4)]);
         thrownFloat.transform.position = floatPosition.position;
         State = GameState.Hooking;
         ZoomInFloat();
@@ -194,31 +207,22 @@ public class FishingManager : MonoBehaviour
     //찌 줌인
     private void ZoomInFloat()
     {
-        Camera.main.transform.DOLocalMove(new Vector3(floatPosition.transform.position.x, floatPosition.transform.position.y,
-            Camera.main.transform.position.z), 1f).OnComplete(GetBite);
+        Camera.main.DOFieldOfView(15, 1f).OnComplete(GetBite);
+        Camera.main.transform.DORotate(new Vector3(13,0,0), 1f);
         Camera.main.DOOrthoSize(3, 1f);
     }
 
     //찌 줌아웃
     private void ZoomOutFloat()
     {
-        Camera.main.transform.DOLocalMove(new Vector3(0, 0,
-              Camera.main.transform.position.z), 1f);
+        Camera.main.DOFieldOfView(60, 1f);
+        Camera.main.transform.DORotate(new Vector3(10,0,0), 1f);
         Camera.main.DOOrthoSize(10, 1f);
     }
 
     //물고기가 미끼 물었을때
     private void GetBite()
     {
-        //최대 내려가는거 2
-        sequence = DOTween.Sequence();
-        sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y - 1, 0.5f));
-        sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y, 0.5f));
-        sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y - 1, 0.5f));
-        sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y, 0.5f));
-        sequence.Append(thrownFloat.transform.DOLocalMoveY(thrownFloat.transform.position.y - 2, 0.5f));
-        sequence.OnComplete(HookingFail);
-        sequence.Play();
         GetRandomFish();
     }
 
@@ -237,6 +241,7 @@ public class FishingManager : MonoBehaviour
         Debug.Log(fishName);
         BiteFish = Instantiate(fishShadow).GetComponent<Fish>();
         BiteFish.SetFish(fishName);
+        BiteFish.transform.position = new Vector3(floatPosition.position.x, floatPosition.position.y - 2, floatPosition.position.z);
     }
 
     //스테이지 확률 테이블 세팅
@@ -262,8 +267,8 @@ public class FishingManager : MonoBehaviour
     //후킹 시도
     public void Hook()
     {
-        sequence.Pause();
-        sequence.Kill();
+        //sequence.Pause();
+        //sequence.Kill();
         float hookPoint = floatPosition.position.y - thrownFloat.transform.position.y;
         if (hookPoint > 1.5f)
         {
@@ -294,7 +299,6 @@ public class FishingManager : MonoBehaviour
     private void HookingFail()
     {
         ZoomOutFloat();
-        sequence.Kill();
         DestroyImmediate(thrownFloat, true);
         FinishFighting();
         State = GameState.Preparation;
@@ -367,28 +371,24 @@ public class FishingManager : MonoBehaviour
         BiteFish.GetDamage(Mathf.FloorToInt(TensionRate * damage));
     }
 
-    //Rode 움직임
-    private void MoveRode()
-    {
-        Vector2 dir = new Vector2(BiteFish.transform.position.x - landinPoint.transform.position.x,
-            BiteFish.transform.position.y - landinPoint.transform.position.y);
-        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        rode.transform.rotation = Quaternion.AngleAxis(angle - 90, new Vector3(0,0,1));
-    }
-
     public void TryStunSnap(Vector2 direction)
     {
+        TensionRate -= 0.5f;
         if(direction.x > 0)
         {
+            rode.StunLeft();
             if(BiteFish.transform.position.x < 0)
             {
+                TensionRate += 0.2f;
                 StunSnap(Mathf.Abs(BiteFish.transform.position.x));
             }
         }
         else
         {
+            rode.StunRight();
             if (BiteFish.transform.position.x > 0)
             {
+                TensionRate += 0.2f;
                 StunSnap(Mathf.Abs(BiteFish.transform.position.x));
             }
         }
@@ -398,12 +398,18 @@ public class FishingManager : MonoBehaviour
     private void StunSnap(float power)
     {
         BiteFish.GetDamage(Mathf.FloorToInt(power));
+        Camera.main.DOShakePosition(0.5f, 1);
         Debug.Log("스턴");
     }
 
     //결과창 닫기
     public void CloseResultPannel ()
     {
+        FishingUIManager.Instance.HideStamp();
+        int price = (from row in FishingData.FishDataTable.AsEnumerable()
+                                              where (string)row["Name"] == BiteFish.FishName
+                                              select row.Field<int>("Price")).ElementAt<int>(0);
+        PlayerPrefs.SetInt("Money", PlayerPrefs.GetInt("Money", 0) + price);
         State = GameState.Preparation; 
         fightingTime = 0f;
         State = GameState.Preparation;
@@ -412,5 +418,37 @@ public class FishingManager : MonoBehaviour
             Destroy(BiteFish.gameObject);
             BiteFish = null;
         }
+    }
+
+    private void CameraControl() 
+    {
+        Vector2 dir = new Vector2(BiteFish.transform.position.x - Camera.main.transform.position.x,
+            BiteFish.transform.position.z - Camera.main.transform.position.z);
+        float angle = 90 - (Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);
+        float cameraAngle = Camera.main.transform.rotation.y * Mathf.Rad2Deg;
+        //Debug.Log($"각 : {angle} 이동해야하는 각  : {angle - cameraAngle}");
+
+        if(angle > 10 || angle < -10) 
+        {
+            return;
+        }
+        
+        if(angle - cameraAngle > 0.1f)
+        {
+             Camera.main.transform.Rotate(new Vector3(0, 0.1f, 0));
+        }
+        else if(angle - cameraAngle < 0.1f)
+        {
+             Camera.main.transform.Rotate(new Vector3(0, - 0.1f, 0));
+        }
+        else if (Mathf.Abs(angle - cameraAngle) > 0.01f)
+        {
+            Camera.main.transform.Rotate(new Vector3(0, angle - cameraAngle, 0));
+        }
+    }
+
+    public void UseBite(string bite)
+    {
+        PlayerPrefs.SetInt(bite, PlayerPrefs.GetInt(bite) - 1);
     }
 }

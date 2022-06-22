@@ -7,6 +7,11 @@ using DG.Tweening;
 public class Real : MonoBehaviour, IPointerEnterHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     bool isOn = false;
+    private RectTransform rect;
+
+    private void Start() {
+        rect = GetComponent<RectTransform>();
+    }
 
     private void Update()
     {
@@ -31,22 +36,23 @@ public class Real : MonoBehaviour, IPointerEnterHandler, IBeginDragHandler, IDra
 
     public void OnBeginDrag(PointerEventData pointerEventData)
     {
-        dragStartPosition = GetComponent<RectTransform>().anchoredPosition;
+        dragStartPosition = rect.anchoredPosition;
         Debug.Log(dragStartPosition);
     }
 
     public void OnEndDrag(PointerEventData pointerEventData)
     {
 
-        FishingManager.Instance.TryStunSnap(GetComponent<RectTransform>().anchoredPosition - dragStartPosition);
+        FishingManager.Instance.TryStunSnap(rect.anchoredPosition - dragStartPosition);
         GetComponent<RectTransform>().anchoredPosition = dragStartPosition;
     }
 
     public void OnDrag(PointerEventData pointerEventData)
     {
         Vector2 mousePos = Input.mousePosition;
-        GetComponent<RectTransform>().position = new Vector2(Camera.main.ScreenToWorldPoint(mousePos).x,
-            Camera.main.ScreenToWorldPoint(mousePos).y);
+        Debug.Log(mousePos);
+        rect.position = new Vector3(mousePos.x,mousePos.y,rect.position.z);//(Camera.main.ScreenToViewportPoint(mousePos).x,
+        //    Camera.main.ScreenToViewportPoint(mousePos).y);
         //float w = transform_icon.rect.width;
         //float h = transform_icon.rect.height;
         //transform_icon.position = transform_cursor.position + (new Vector3(w, h) * 0.5f);

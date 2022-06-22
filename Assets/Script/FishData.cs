@@ -64,7 +64,6 @@ public static class FishingData
                 {
                     row = upStream.NewRow();
                     row["Name"] = data.Key.ToString();
-                    row["Probability"] = float.Parse(data.Value["Probability"].ToString().Replace('%', ' ')) / 100f;
                     row["Bite 1"] = float.Parse(data.Value["Bite 1"].ToString().Replace('%', ' ')) / 100f;
                     row["Bite 2"] = float.Parse(data.Value["Bite 2"].ToString().Replace('%', ' ')) / 100f;
                     upStream.Rows.Add(row);

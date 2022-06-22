@@ -15,7 +15,7 @@ public class ResultPanel : MonoBehaviour
         Sprite test = Resources.Load<Sprite>("FishSprites/" + fishName);
         image.sprite = Resources.Load<Sprite>("FishSprites/" + fishName);
         this.fishName.text = fishName;
-        this.length.text = length.ToString();
+        this.length.text = length.ToString() + "cm";
         this.freshMent.text = freshMentClass;
     }
 }

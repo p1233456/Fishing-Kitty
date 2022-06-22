@@ -11,8 +11,4 @@ public class BiteManager : MonoBehaviour
         //추후 변경
         FishingManager.Instance.SetStageProbability("UpStream");
     }
-    public void UseBite(string bite)
-    {
-        PlayerPrefs.SetInt(bite, PlayerPrefs.GetInt(bite) - 1);
-    }
 }

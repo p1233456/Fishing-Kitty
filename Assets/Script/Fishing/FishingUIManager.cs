@@ -12,12 +12,17 @@ public class FishingUIManager : MonoBehaviour
     public GameObject[] fightingUI;
     public GameObject[] resultUI;
 
+    [SerializeField] private Text[] missionTexts;
     [SerializeField] private Image tensionImage;
     [SerializeField] GameObject resultPanel;
     [SerializeField] Text timingText;
 
     [SerializeField] GameObject retryPannel;
     [SerializeField] GameObject bitePannel;
+
+    [SerializeField] GameObject missionStamp;
+
+    [SerializeField] Text price;
     private void Awake()
     {
         Instance = this;
@@ -36,6 +41,7 @@ public class FishingUIManager : MonoBehaviour
                 Hide(hookingUI);
                 Hide(fightingUI);
                 Hide(resultUI);
+                ShowMissions();
                 break;
             case GameState.Hooking:
                 Appear(hookingUI);
@@ -101,7 +107,7 @@ public class FishingUIManager : MonoBehaviour
     {
         resultPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
         resultPanel.GetComponent<ResultPanel>().SetPanel(FishingManager.Instance.BiteFish.FishName, 
-            FishingManager.Instance.BiteFish.Size, "A");
+            FishingManager.Instance.BiteFish.Size, "신선해요!");
     }
 
     public void ViewHookTiming(string result)
@@ -135,5 +141,29 @@ public class FishingUIManager : MonoBehaviour
     public void HideBitePanel()
     {
         bitePannel.SetActive(false);
+    }
+
+    public void ShowMissions()
+    {
+        for(int i =0; i < missionTexts.Length; i++)
+        {
+            Debug.Log($"{MissionManager.Instance.AssignedMissions[i].TargetName} ({MissionManager.Instance.AssignedMissions[i].CurrentCount}");
+            missionTexts[i].text = $"{MissionManager.Instance.AssignedMissions[i].TargetName} ({MissionManager.Instance.AssignedMissions[i].CurrentCount} / {MissionManager.Instance.AssignedMissions[i].GoalCount})";
+        }
+    }
+
+    public void ShowStamp()
+    {
+        missionStamp.SetActive(true);
+    }
+
+    public void HideStamp()
+    {
+        missionStamp.SetActive(false);
+    }
+
+    public void SetPrice(int price)
+    {
+        this.price.text = price + "원";
     }
 }

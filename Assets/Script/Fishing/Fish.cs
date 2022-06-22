@@ -19,9 +19,9 @@ public class Fish : MonoBehaviour
 
     [SerializeField] private GameObject damageText;
 
-    private Vector2 direction; 
-    Vector2 randDirection;
-    //[SerializeField] float speed = 1f;
+    private Vector3 direction; 
+    Vector3 randDirection;
+    [SerializeField] float speed;
     [SerializeField] Sprite leftSprite;
     [SerializeField] Sprite rightSprite;
     private SpriteRenderer spriteRenderer;
@@ -72,7 +72,7 @@ public class Fish : MonoBehaviour
         {
             spriteRenderer.sprite = leftSprite;
         }
-        transform.Translate((direction.normalized + randDirection.normalized).normalized * Time.deltaTime);
+        transform.Translate((direction.normalized + randDirection.normalized).normalized * speed * Time.deltaTime);
         direction = Vector2.zero;
     }
 
@@ -80,7 +80,7 @@ public class Fish : MonoBehaviour
     {
         while (currentHP > 0)
         {
-            randDirection = new Vector2(Mathf.FloorToInt(Random.Range(0, 2) == 1 ? 1 : -1), 1);
+            randDirection = new Vector3(Mathf.FloorToInt(Random.Range(0, 2) == 1 ? 1 : -1), 0, 1);
             yield return new WaitForSeconds(Random.Range(0.5f, 1.5f));
         }
     }
@@ -95,7 +95,7 @@ public class Fish : MonoBehaviour
         }
     }
 
-        public void HealFish()
+    public void HealFish()
     {
         if(currentHP < maxHP)
         {
@@ -103,8 +103,8 @@ public class Fish : MonoBehaviour
         }
     }
 
-    public void Move(Vector2 target)
+    public void Move(Vector3 target)
     {
-        direction = target - new Vector2(transform.position.x, transform.position.y);
+        direction = target - new Vector3(transform.position.x, transform.position.y, transform.position.z);
     }
 }

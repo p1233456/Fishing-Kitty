@@ -12,7 +12,7 @@ public class TitleManager : MonoBehaviour
 
     public void LoadDictionary()
     {
-        SceneManager.LoadScene("Dictonary");
+        SceneManager.LoadScene("Dictionary");
     }
 
     public void LoadSetting()
