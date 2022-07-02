@@ -5,7 +5,20 @@ using UnityEngine.SceneManagement;
 
 public class SceneChanger : MonoBehaviour
 {
-    public void SceneChange(string sceneName)
+    [SerializeField] bool isQ = true;
+    [SerializeField] string sceneName;
+
+    private void Update() {
+        if(gameObject.activeSelf == true)
+        {
+            if(Input.GetKeyDown(KeyCode.Q) && isQ)
+            {
+                SceneChange();
+            }
+        }
+    }
+
+    public void SceneChange()
     {
         SceneManager.LoadScene(sceneName);
     }

@@ -50,7 +50,7 @@ public class Real : MonoBehaviour, IPointerEnterHandler, IBeginDragHandler, IDra
     public void OnDrag(PointerEventData pointerEventData)
     {
         Vector2 mousePos = Input.mousePosition;
-        Debug.Log(mousePos);
+        //Debug.Log(mousePos);
         rect.position = new Vector3(mousePos.x,mousePos.y,rect.position.z);//(Camera.main.ScreenToViewportPoint(mousePos).x,
         //    Camera.main.ScreenToViewportPoint(mousePos).y);
         //float w = transform_icon.rect.width;

@@ -56,7 +56,11 @@ public class Fish : MonoBehaviour
     {
         if (FishingManager.Instance.State == GameState.Fighting && currentHP > 0)
         {
-            //Debug.Log((randDirection));
+            Debug.Log($"direction : {direction} randDirection : {randDirection} speed : {speed}");
+            if (randDirection == Vector3.zero)
+            {
+                randDirection = new Vector3(-1, 0, 1);
+            }
         }
         else
         {

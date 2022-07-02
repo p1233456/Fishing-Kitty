@@ -23,6 +23,11 @@ public class MissionManager : MonoBehaviour
         }
     }
 
+    private void Start() {
+        MissionEmptyCheck();
+        MissionCompleteCheck();        
+    }
+
     private void Update() {
         MissionEmptyCheck();
         MissionCompleteCheck();

@@ -635,7 +635,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: Scene Changer
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 3881098884119163420, guid: e265d287dd62dc84baa7baaf7c23485e, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: e265d287dd62dc84baa7baaf7c23485e, type: 3}
 --- !u!224 &440560556 stripped
 RectTransform:

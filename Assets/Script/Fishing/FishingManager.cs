@@ -241,7 +241,7 @@ public class FishingManager : MonoBehaviour
         Debug.Log(fishName);
         BiteFish = Instantiate(fishShadow).GetComponent<Fish>();
         BiteFish.SetFish(fishName);
-        BiteFish.transform.position = new Vector3(floatPosition.position.x, floatPosition.position.y - 2, floatPosition.position.z);
+        BiteFish.transform.position = new Vector3(floatPosition.position.x + 2, floatPosition.position.y - 2, floatPosition.position.z);
     }
 
     //스테이지 확률 테이블 세팅

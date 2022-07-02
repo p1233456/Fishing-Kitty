@@ -147,7 +147,7 @@ public class FishingUIManager : MonoBehaviour
     {
         for(int i =0; i < missionTexts.Length; i++)
         {
-            Debug.Log($"{MissionManager.Instance.AssignedMissions[i].TargetName} ({MissionManager.Instance.AssignedMissions[i].CurrentCount}");
+            //Debug.Log($"{MissionManager.Instance.AssignedMissions[i].TargetName} ({MissionManager.Instance.AssignedMissions[i].CurrentCount}");
             missionTexts[i].text = $"{MissionManager.Instance.AssignedMissions[i].TargetName} ({MissionManager.Instance.AssignedMissions[i].CurrentCount} / {MissionManager.Instance.AssignedMissions[i].GoalCount})";
         }
     }
